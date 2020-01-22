@@ -50,7 +50,7 @@ def make_response_with_origin(request, body):
 
 
 def server():
-    app = AwsLambdaFlask(__name__, static_folder='static', static_url_path='/static') #, template_folder='templates')
+    app = AwsLambdaFlask(__name__)
 
     @app.route('/', methods=['OPTIONS', 'GET', 'POST'])
     @respond_if_options()
