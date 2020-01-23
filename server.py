@@ -10,8 +10,8 @@ origins = [
 ]
 
 
-def get_headers_with_origin(request):
-    origin = request.headers.get('Origin', '')
+def get_headers_with_origin(req):
+    origin = req.headers.get('Origin', '')
 
     if origin not in origins:
         origin = origins[0]
@@ -20,7 +20,7 @@ def get_headers_with_origin(request):
         'Access-Control-Allow-Origin': origin,
         'Access-Control-Allow-Methods': 'OPTIONS, GET, POST, DELETE',
         'Access-Control-Allow-Headers': 'Origin, Cookie, Content-Type, x-forced-preflight',
-        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Credentials': 'true'
     }
 
 
@@ -42,15 +42,15 @@ def respond_if_options():
     return decorator
 
 
-def make_response_with_origin(request, body):
+def make_response_with_origin(req, body):
     resp = make_response(body)
-    resp.headers = get_headers_with_origin(request)
+    resp.headers = get_headers_with_origin(req)
 
     return resp
 
 
 def server():
-    app = AwsLambdaFlask(__name__, static_folder='static', static_url_path='/static') #, template_folder='templates')
+    app = AwsLambdaFlask(__name__)  # , static_folder='static', static_url_path='/static', template_folder='templates')
 
     @app.route('/', methods=['OPTIONS', 'GET', 'POST'])
     @respond_if_options()
@@ -58,5 +58,6 @@ def server():
         return make_response_with_origin(request, {'status': 'OK'})
 
     return app
+
 
 run = server()

@@ -17,3 +17,5 @@ zip -r9 ${OLDPWD}/bin_$DATE.zip .
 
 cd $OLDPWD
 zip -g bin_$DATE.zip *.py
+
+aws lambda update-function-code --function-name my-function --zip-file fileb://bin_$DATE.zip

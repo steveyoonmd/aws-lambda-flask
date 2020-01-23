@@ -19,12 +19,15 @@
 
 import sys
 from io import StringIO
+from typing import Dict, Any, Union
 from urllib.parse import urlencode
 
 from flask import Flask
 
 
 class AwsLambdaRequest:
+    env: Dict[Union[str, Any], Union[Union[str, StringIO], Any]]
+
     def __init__(self, evt):
         self.env = {
             'REQUEST_METHOD': '',
@@ -61,9 +64,9 @@ class AwsLambdaRequest:
         self.env['REQUEST_METHOD'] = evt.get('httpMethod', '')
         self.env['PATH_INFO'] = evt.get('path', '')
 
-        queryStringParameters = evt.get('queryStringParameters', '')
-        if queryStringParameters:
-            self.env['QUERY_STRING'] = urlencode(queryStringParameters)
+        query_string_parameters = evt.get('queryStringParameters', '')
+        if query_string_parameters:
+            self.env['QUERY_STRING'] = urlencode(query_string_parameters)
 
         body = evt.get('body', '')
         if body:
@@ -81,8 +84,8 @@ class AwsLambdaResponse:
         self.headers = {}
         self.body = ''
 
-    def put_headers(self, statusCode, headers, exc_info=None):
-        self.statusCode = statusCode[:3]
+    def put_headers(self, status_code, headers, exc_info=None):
+        self.statusCode = status_code[:3]
         self.headers = dict(headers)
 
     def as_dict(self):
@@ -111,7 +114,7 @@ class AwsLambdaFlask(Flask):
             pass
 
         except Exception as ex:
-            print(ex) # for aws cloudWatch logs
+            print(ex)  # for aws cloudWatch logs
 
             resp.statusCode = '500'
             resp.body = 'internal server error'
