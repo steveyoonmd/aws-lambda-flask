@@ -1,98 +1,105 @@
-# Copyright 2016 Matt Martz
-# All Rights Reserved.
-#
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
-#    not use this file except in compliance with the License. You may obtain
-#    a copy of the License at
-#
-#         http://www.apache.org/licenses/LICENSE-2.0
-#
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#    License for the specific language governing permissions and limitations
-#    under the License.
+# ISC License
 
+# Copyright (c) 2018-2020 Adam Johnson
 
-# https://github.com/sivel/flask-lambda
-# https://github.com/techjacker/flask-lambda
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+# LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+
+# https://github.com/adamchainz/apig-wsgi
 
 import sys
-from io import StringIO
-from typing import Dict, Any, Union
-from urllib.parse import urlencode
+from io import BytesIO
 
 from flask import Flask
 
 
-class AwsLambdaRequest:
-    env: Dict[Union[str, Any], Union[Union[str, StringIO], Any]]
+def env_from(evt):
+    env = {
+        'REQUEST_METHOD': evt['httpMethod'],
+        'PATH_INFO': evt['path'],
+        'SERVER_PROTOCOL': 'HTTP/1.1',
+        'SERVER_NAME': 'server_name',
+        'SERVER_PORT': '80',
 
-    def __init__(self, evt):
-        self.env = {
-            'REQUEST_METHOD': '',
-            'PATH_INFO': '',
-            'QUERY_STRING': '',
-            'SERVER_PROTOCOL': 'HTTP/1.1',
-            'CONTENT_TYPE': '',
-            'CONTENT_LENGTH': '',
-            'REMOTE_ADDR': '',
-            'HTTP_X_FORWARDED_PROTO': '',
-            'SERVER_NAME': 'SERVER_NAME',
-            'SERVER_PORT': '',
-    
-            'wsgi.version': (1, 0),
-            'wsgi.errors': sys.stderr,
-            'wsgi.input': None,
-            'wsgi.url_scheme': '',
-            'wsgi.run_once': True,
-            'wsgi.multiprocess': False,
-            'wsgi.multithread': False,
-        }
-
-        headers = evt.get('headers', {}) or {}
-        for k, v in headers.items():
-            k = k.replace('-', '_').upper()
-
-            if k in ['CONTENT_TYPE', 'CONTENT_LENGTH']:
-                self.env[k] = v
-                continue
-
-            n = 'HTTP_{}'.format(k)
-            self.env[n] = v
+        'wsgi.version': (1, 0),
+        'wsgi.errors': sys.stderr,
+        'wsgi.input': None,
+        'wsgi.url_scheme': '',
+        'wsgi.run_once': False,
+        'wsgi.multiprocess': False,
+        'wsgi.multithread': False,
+    }
         
-        self.env['REQUEST_METHOD'] = evt.get('httpMethod', '')
-        self.env['PATH_INFO'] = evt.get('path', '')
+    query_string_parameters = evt.get('queryStringParameters') or {}
+    env['QUERY_STRING'] = '&'.join('{}={}'.format(k, v) for (k, v) in query_string_parameters.items())
 
-        query_string_parameters = evt.get('queryStringParameters', '')
-        if query_string_parameters:
-            self.env['QUERY_STRING'] = urlencode(query_string_parameters)
+    body = evt.get('body', '') or ''
+    if evt.get('isBase64Encoded', False):
+        body = b64decode(body)
+    else:
+        body = body.encode('utf-8')
 
-        body = evt.get('body', '')
-        if body:
-            self.env['CONTENT_LENGTH'] = str(len(body))
-            self.env['wsgi.input'] = StringIO(body)
+    env['CONTENT_LENGTH'] = str(len(body))
+    env['wsgi.input'] = BytesIO(body)
 
-        self.env['REMOTE_ADDR'] = evt['requestContext']['identity']['sourceIp']
-        self.env['SERVER_PORT'] = self.env.get('HTTP_X_FORWARDED_PORT', '')
-        self.env['wsgi.url_scheme'] = self.env.get('HTTP_X_FORWARDED_PROTO', '')
+    headers = evt.get('headers', {}) or {}
+    for key, value in headers.items():
+        key = key.upper().replace('-', '_')
+
+        if key == 'CONTENT_TYPE':
+            env['CONTENT_TYPE'] = value
+        elif key == 'HOST':
+            env['SERVER_NAME'] = value
+        elif key == 'X_FORWARDED_FOR':
+            env['REMOTE_ADDR'] = value.split(', ')[0]
+        elif key == 'X_FORWARDED_PROTO':
+            env['wsgi.url_scheme'] = value
+        elif key == 'X_FORWARDED_PORT':
+            env["SERVER_PORT"] = value
+
+        env['HTTP_' + key] = value
+
+    return env
 
 
-class AwsLambdaResponse:
+class Resp:
     def __init__(self):
         self.statusCode = '200'
-        self.headers = {}
-        self.body = ''
+        self.headers = []
+        self.body = BytesIO()
 
-    def put_headers(self, status_code, headers, exc_info=None):
+    def start_resp(self, status_code, headers, exc_info=None):
+        if exc_info is not None:
+            raise exc_info[0](exc_info[1]).with_traceback(exc_info[2])
+
         self.statusCode = status_code[:3]
-        self.headers = dict(headers)
+        self.headers.extend(headers)
+
+        return self.body.write
+
+    def write_body(self, body):
+        try:
+            for data in body:
+                if data:
+                    self.body.write(data)
+        finally:
+            if hasattr(result, 'close'):
+                body.close()
 
     def as_dict(self):
         return {
             'statusCode': self.statusCode,
-            'headers': self.headers,
-            'body': self.body,
+            'headers': dict(self.headers),
+            'body': self.body.getvalue().decode('utf-8'),
         }
 
 
@@ -100,24 +107,8 @@ class AwsLambdaFlask(Flask):
     def __call__(self, evt, ctx):
         if 'httpMethod' not in evt:
             return super(AwsLambdaFlask, self).__call__(evt, ctx)
-        
-        req = AwsLambdaRequest(evt)
-        resp = AwsLambdaResponse()
 
-        try:
-            resp.body = next(self.wsgi_app(
-                req.env,
-                resp.put_headers
-            )).decode('utf-8')
+        resp = Resp()
+        resp.write_body(self.wsgi_app(env_from(evt), resp.start_resp))
 
-        except StopIteration:
-            pass
-
-        except Exception as ex:
-            print(ex)  # for aws cloudWatch logs
-
-            resp.statusCode = '500'
-            resp.body = 'internal server error'
-
-        finally:
-            return resp.as_dict()
+        return resp.as_dict()
