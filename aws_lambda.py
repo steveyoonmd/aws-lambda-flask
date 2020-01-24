@@ -1,4 +1,3 @@
-# ISC License
 
 # Copyright (c) 2018-2020 Adam Johnson
 
