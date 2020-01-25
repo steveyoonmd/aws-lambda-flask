@@ -10,7 +10,7 @@ cp -f *.py ./bin
 cd ./bin
 pip3 install --target ./package flask
 
-DATE=$(date '+%Y%m%d_%H%M%S')
+DATE=$(date '+%Y%m%d_%H%M%S_UTC')
 
 cd ./package
 zip -r9 ${OLDPWD}/bin_$DATE.zip .

@@ -23,8 +23,8 @@ window.addEventListener('load', function () {
                 alert(1);
             })
 
-            //var baseURL = 'https://0ss0paddq1.execute-api.ap-northeast-2.amazonaws.com/default';
-            var baseURL = '';
+            var baseURL = 'https://0ss0paddq1.execute-api.ap-northeast-2.amazonaws.com/default';
+            //var baseURL = '';
 
             doc.get('#test_get').addEventListener('click', function () {
                 var testGetFormData = new FormData();
@@ -63,9 +63,9 @@ window.addEventListener('load', function () {
             doc.get('.copyright-year').innerHTML = (new Date()).getFullYear();
             doc.get('.msg-container').addEventListener('click', function () {
                 this.style.display = 'none';
-            })
-        })
-    })
-})
+            });
+        });
+    });
+});
 </script>
 </html>

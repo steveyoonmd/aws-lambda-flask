@@ -1,3 +1,4 @@
+# ISC License
 
 # Copyright (c) 2018-2020 Adam Johnson
 
@@ -21,12 +22,12 @@ from io import BytesIO
 from flask import Flask
 
 
-def env_from(evt):
+def wsgi_env(evt):
     env = {
         'REQUEST_METHOD': evt['httpMethod'],
         'PATH_INFO': evt['path'],
         'SERVER_PROTOCOL': 'HTTP/1.1',
-        'SERVER_NAME': 'server_name',
+        'SERVER_NAME': 'localhost',
         'SERVER_PORT': '80',
 
         'wsgi.version': (1, 0),
@@ -38,7 +39,7 @@ def env_from(evt):
         'wsgi.multithread': False,
     }
         
-    query_string_parameters = evt.get('queryStringParameters') or {}
+    query_string_parameters = evt.get('queryStringParameters', {}) or {}
     env['QUERY_STRING'] = '&'.join('{}={}'.format(k, v) for (k, v) in query_string_parameters.items())
 
     body = evt.get('body', '') or ''
@@ -58,19 +59,19 @@ def env_from(evt):
             env['CONTENT_TYPE'] = value
         elif key == 'HOST':
             env['SERVER_NAME'] = value
+        elif key == 'X_FORWARDED_PORT':
+            env["SERVER_PORT"] = value
         elif key == 'X_FORWARDED_FOR':
             env['REMOTE_ADDR'] = value.split(', ')[0]
         elif key == 'X_FORWARDED_PROTO':
             env['wsgi.url_scheme'] = value
-        elif key == 'X_FORWARDED_PORT':
-            env["SERVER_PORT"] = value
 
         env['HTTP_' + key] = value
 
     return env
 
 
-class Resp:
+class AwsAPIGatewayResponse:
     def __init__(self):
         self.statusCode = '200'
         self.headers = []
@@ -91,7 +92,7 @@ class Resp:
                 if data:
                     self.body.write(data)
         finally:
-            if hasattr(result, 'close'):
+            if hasattr(body, 'close'):
                 body.close()
 
     def as_dict(self):
@@ -107,7 +108,7 @@ class AwsLambdaFlask(Flask):
         if 'httpMethod' not in evt:
             return super(AwsLambdaFlask, self).__call__(evt, ctx)
 
-        resp = Resp()
-        resp.write_body(self.wsgi_app(env_from(evt), resp.start_resp))
+        resp = AwsAPIGatewayResponse()
+        resp.write_body(self.wsgi_app(wsgi_env(evt), resp.start_resp))
 
         return resp.as_dict()
