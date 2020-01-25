@@ -47,7 +47,7 @@ def create_app():
         SESSION_COOKIE_SAMESITE=None,
         SESSION_COOKIE_SECURE=True,
     )
-    app.config['UPLOAD_FOLDER'] = './upload/'
+    app.config['UPLOAD_FOLDER'] = '/tmp/'
     
     @app.before_request
     def before_request():
