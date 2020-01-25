@@ -21,7 +21,7 @@ def with_origin(req):
 
     return {
         'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Methods': 'DELTE, GET, HEAD, OPTIONS, PATCH, POST, PUT',
+        'Access-Control-Allow-Methods': 'DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT',
         'Access-Control-Allow-Headers': 'Authorization, Content-Type, Cookie, Origin, X-Amz-Date, X-Amz-Security-Token, X-Api-Key, x-forced-preflight',
         'Access-Control-Allow-Credentials': 'true',
     }
