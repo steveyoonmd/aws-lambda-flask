@@ -177,7 +177,7 @@
 // WebSock
 
 // Storage
-    eStorage = {
+    var eStorage = {
         PERSIST: 1, // localStorage
         SESSION: 2, // sessionStorage
     }
