@@ -5,6 +5,7 @@ mkdir -p ./bin/package
 
 cp -f *.py ./bin
 # cp -f *.json ./bin
+cp -rf ./doc ./bin
 
 cd ./bin
 pip3 install --target ./package flask
@@ -18,3 +19,4 @@ cd $OLDPWD
 zip -g bin_$DATE.zip *.py
 
 # aws lambda update-function-code --function-name my-function --zip-file fileb://bin_$DATE.zip
+

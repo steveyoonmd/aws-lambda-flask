@@ -71,20 +71,15 @@ def wsgi_env(evt):
     return env
 
 
-class AwsAPIGatewayResponse:
+class AwsLambdaResponse:
     def __init__(self):
         self.statusCode = '200'
         self.headers = []
         self.body = BytesIO()
 
     def start_resp(self, status_code, headers, exc_info=None):
-        if exc_info is not None:
-            raise exc_info[0](exc_info[1]).with_traceback(exc_info[2])
-
         self.statusCode = status_code[:3]
         self.headers.extend(headers)
-
-        return self.body.write
 
     def write_body(self, body):
         try:
@@ -108,7 +103,7 @@ class AwsLambdaFlask(Flask):
         if 'httpMethod' not in evt:
             return super(AwsLambdaFlask, self).__call__(evt, ctx)
 
-        resp = AwsAPIGatewayResponse()
+        resp = AwsLambdaResponse()
         resp.write_body(self.wsgi_app(wsgi_env(evt), resp.start_resp))
 
         return resp.as_dict()
