@@ -5,7 +5,7 @@ mkdir -p ./bin/package
 
 cp -f *.py ./bin
 # cp -f *.json ./bin
-cp -rf ./doc ./bin
+# cp -rf ./doc ./bin
 
 cd ./bin
 pip3 install --target ./package flask
