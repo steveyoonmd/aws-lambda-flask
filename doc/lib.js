@@ -179,36 +179,32 @@
     var xmlHttp = new XMLHttp();
 
 // WebSock
-    var isWebSockConnected = false;
     var WebSock = function () {
         this.ws = null;
     }
     WebSock.prototype.connect = function (wsServerURL, protocol, openCallback, messageCallback) {
-        if (isWebSockConnected) { return; }
-
         this.ws = new WebSocket(wsServerURL, protocol);
-        isWebSockConnected = true;
 
         this.ws.addEventListener('open', openCallback);
         this.ws.addEventListener('message', messageCallback);
         
         this.ws.addEventListener('error', function () {
-            isWebSockConnected = false;
-            this.ws.close();
-
             alert('WebSock.NetworkError');
         })
     }
     WebSock.prototype.send = function (data) {
-        if (isWebSockConnected) {
-            this.ws.send(data);
+        if (this.ws === null || this.ws.readyState !== this.ws.OPEN) {
+            return;
         }
+
+        this.ws.send(data);
     }
     WebSock.prototype.disconnect = function (data) {
-        if (isWebSockConnected) {
-            isWebSockConnected = false;
-            this.ws.close();
+        if (this.ws === null || this.ws.readyState !== this.ws.OPEN) {
+            return;
         }
+
+        this.ws.close();
     }
     var webSock = new WebSock();
 
@@ -227,14 +223,14 @@
     Storage.prototype.set = function (type, key, value) {
         if (type === eStorage.SESSION) {
             sessionStorage.setItem(key, value);
-        } else if (type === eStorage.PERSIST) {
+        } else if (type === eStorage.LOCAL) {
             localStorage.setItem(key, value);
         }
     }
     Storage.prototype.remove = function (type, key) {
         if (type === eStorage.SESSION) {
             sessionStorage.removeItem(key);
-        } else if (type === eStorage.PERSIST) {
+        } else if (type === eStorage.LOCAL) {
             localStorage.removeItem(key);
         }
     }
