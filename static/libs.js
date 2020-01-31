@@ -99,11 +99,7 @@
         var documentCookie = '; ' + document.cookie;
         var cookieSplit = documentCookie.split('; ' + name + '=');
 
-        if (cookieSplit.length === 2) {
-            return cookieSplit.pop().split('; ').shift();
-        }
-
-        return defaultValue;
+        return (cookieSplit.length === 2) ? cookieSplit.pop().split('; ').shift() : defaultValue;
     }
     Cookie.prototype.set = function (name, value, days) {
         var expires = '';
@@ -142,11 +138,12 @@
             this.xhr.removeEventListener('load', this.prevCallback);
             this.prevCallback = null;
         }
-        
+
         this.xhr.addEventListener('load', callback);
         this.prevCallback = callback;
 
         var method = '';
+        var content_type = '';
         var body = null;
 
         if (type === eHttp.GET) {
@@ -154,27 +151,38 @@
             if (data !== null) {
                 url += '?' + (new URLSearchParams(data)).toString();
             }
+            content_type = 'application/x-www-form-urlencoded';
             body = null;
         } else if (type === eHttp.POST) {
             method = 'POST';
-            body = data;
+            content_type = 'application/x-www-form-urlencoded';
+            body = (new URLSearchParams(data)).toString();
         } else if (type === eHttp.JSON) {
             method = 'POST';
+            content_type = 'application/json';
             body = JSON.stringify(data);
         } else if (type === eHttp.UPLOAD) {
             method = 'POST';
+            content_type = '';
             body = data;
         }
 
         this.xhr.open(method, url, true);
-        if (type == eHttp.JSON) {
-            this.xhr.setRequestHeader('Content-Type', 'application/json');
+
+        if (content_type !== '') {
+            this.xhr.setRequestHeader('Content-Type', content_type);
         }
+
         if (withCredentials === true) {
             this.xhr.withCredentials = true;
             this.xhr.setRequestHeader('x-forced-preflight', 'true');
         }
-        this.xhr.send(body);
+
+        if (method === 'GET') {
+            this.xhr.send();
+        } else {
+            this.xhr.send(body);
+        }
     }
     var xmlHttp = new XMLHttp();
 
@@ -185,12 +193,11 @@
     WebSock.prototype.connect = function (wsServerURL, protocol, openCallback, messageCallback) {
         this.ws = new WebSocket(wsServerURL, protocol);
 
+        this.ws.addEventListener('error', function (evt) {
+            alert('WebSock.NetworkError');
+        });
         this.ws.addEventListener('open', openCallback);
         this.ws.addEventListener('message', messageCallback);
-        
-        this.ws.addEventListener('error', function () {
-            alert('WebSock.NetworkError');
-        })
     }
     WebSock.prototype.send = function (data) {
         if (this.ws === null || this.ws.readyState !== this.ws.OPEN) {
@@ -199,7 +206,7 @@
 
         this.ws.send(data);
     }
-    WebSock.prototype.disconnect = function (data) {
+    WebSock.prototype.disconnect = function (evt) {
         if (this.ws === null || this.ws.readyState !== this.ws.OPEN) {
             return;
         }
@@ -213,7 +220,7 @@
         SESSION: 1, // sessionStorage
         LOCAL: 2 // localStorage
     }
-    
+
     var Storage = function () {
     }
     Storage.prototype.get = function (type, key, defaultValue) {
@@ -223,14 +230,14 @@
     Storage.prototype.set = function (type, key, value) {
         if (type === eStorage.SESSION) {
             sessionStorage.setItem(key, value);
-        } else if (type === eStorage.LOCAL) {
+        } else if (type === eStorage.PERSIST) {
             localStorage.setItem(key, value);
         }
     }
     Storage.prototype.remove = function (type, key) {
         if (type === eStorage.SESSION) {
             sessionStorage.removeItem(key);
-        } else if (type === eStorage.LOCAL) {
+        } else if (type === eStorage.PERSIST) {
             localStorage.removeItem(key);
         }
     }

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body>
+</body>
+
+<script src="/static/libs.js?2015-01-20"></script>
+<script>
+'use strict';
+
+window.addEventListener('load', function () {
+    xmlHttp.request(eHttp.GET, '/static/head.html', null, true, function () {
+        doc.get('head').innerHTML = this.responseText;
+
+        xmlHttp.request(eHttp.GET, '/static/body.html', null, true, function () {
+            doc.get('body').innerHTML = this.responseText;
+
+            doc.get('.nav-icon').addEventListener('click', function () {
+                alert(1);
+            })
+
+            var baseURL = 'https://0ss0paddq1.execute-api.ap-northeast-2.amazonaws.com/default';
+            //var baseURL = '';
+
+            doc.get('#test_get').addEventListener('click', function () {
+                var testGetFormData = new FormData();
+                testGetFormData.append('a', 1);
+                testGetFormData.append('b', 2);
+
+                xmlHttp.request(eHttp.GET, baseURL + '/test1/test_get', testGetFormData, true, function () {
+                    console.log(this.responseText);
+                })
+            })
+
+            doc.get('#test_post').addEventListener('click', function () {
+                var testPostFormData = new FormData();
+                testPostFormData.append('a', 1);
+                testPostFormData.append('b', 2);
+
+                xmlHttp.request(eHttp.POST, baseURL + '/test1/test_post', testPostFormData, true, function () {
+                    console.log(this.responseText);
+                })
+            })
+            
+            doc.get('#test_json').addEventListener('click', function () {
+                xmlHttp.request(eHttp.JSON, baseURL + '/test2/test_json', {'a':1, 'b': 2}, true, function () {
+                    console.log(this.responseText);
+                })
+            })
+
+            doc.get('#test_upload').addEventListener('click', function () {
+                let testUploadFormData = new FormData(doc.get('form'));
+
+                xmlHttp.request(eHttp.UPLOAD, baseURL + '/test2/test_upload', testUploadFormData, true, function () {
+                    console.log(this.responseText);
+                })
+            })
+
+            doc.get('.copyright-year').innerHTML = (new Date()).getFullYear();
+            doc.get('.msg-container').addEventListener('click', function () {
+                this.style.display = 'none';
+            });
+            
+            doc.get('#test_websock_connect').addEventListener('click', function () {
+                webSock.connect('ws://ec2-52-79-228-44.ap-northeast-2.compute.amazonaws.com:10081', 'chat-protocol', function openCallback (evt) {
+                }, function messageCallback (evt) {
+                    alert(evt.data);
+                });
+            });
+            
+            doc.get('#test_websock_send').addEventListener('click', function () {
+                webSock.send('test_websock_send');
+            });
+
+            doc.get('#test_websock_disconnect').addEventListener('click', function () {
+                webSock.disconnect();
+            });
+            
+            doc.get('#test_storage_session_get').addEventListener('click', function () {
+                alert(storage.get(eStorage.SESSION, 'a', 0));
+            });
+            
+            doc.get('#test_storage_session_set').addEventListener('click', function () {
+                storage.set(eStorage.SESSION, 'a', 1);
+            });
+            
+            doc.get('#test_storage_session_remove').addEventListener('click', function () {
+                storage.remove(eStorage.SESSION, 'a');
+            });
+            
+            doc.get('#test_storage_local_get').addEventListener('click', function () {
+                alert(storage.get(eStorage.LOCAL, 'a', 0));
+            });
+            
+            doc.get('#test_storage_local_set').addEventListener('click', function () {
+                storage.set(eStorage.LOCAL, 'a', 1);
+            });
+            
+            doc.get('#test_storage_local_remove').addEventListener('click', function () {
+                storage.remove(eStorage.LOCAL, 'a');
+            });
+        });
+    });
+});
+</script>
+</html>

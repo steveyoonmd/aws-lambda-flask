@@ -1,22 +1,27 @@
-#!/bin/sh
+#!/builds/sh
 
-rm -rf ./bin
-mkdir -p ./bin/package
+rm -rf ./builds
+mkdir -p ./builds/package
 
-cp -f *.py ./bin
-# cp -f *.json ./bin
-# cp -rf ./doc ./bin
+cp -r ./blueprints ./builds
+cp -r ./libs ./builds
+cp -r ./static ./builds
+cp app.py ./builds
 
-cd ./bin
+cd ./builds
 pip3 install --target ./package flask
 
 DATE=$(date '+%Y%m%d_%H%M%S_%Z')
 
 cd ./package
-zip -r9 ${OLDPWD}/bin_$DATE.zip .
+zip -r9 ${OLDPWD}/build_$DATE.zip .
 
 cd $OLDPWD
-zip -g bin_$DATE.zip *.py
+zip -r9 ./build_$DATE.zip ./blueprints
+zip -r9 ./build_$DATE.zip ./libs
+zip -r9 ./build_$DATE.zip ./static
 
-# aws lambda update-function-code --function-name my-function --zip-file fileb://bin_$DATE.zip
+zip -g build_$DATE.zip *.py
+
+# aws lambda update-function-code --function-name my-function --zip-file fileb://build_$DATE.zip
 
