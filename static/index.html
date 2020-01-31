@@ -8,63 +8,64 @@
 <body>
 </body>
 
-<script src="./static/libs.js?2015-01-20"></script>
+<script src="./libs.js?2015-01-20"></script>
 <script>
 'use strict';
 
 window.addEventListener('load', function () {
-    xmlHttp.request(eHttp.GET, './static/head.html', null, true, function () {
+    xmlHttp.request(eHttp.GET, './head.html', null, true, function () {
         doc.get('head').innerHTML = this.responseText;
 
-        xmlHttp.request(eHttp.GET, './static/body.html', null, true, function () {
+        xmlHttp.request(eHttp.GET, './body.html', null, true, function () {
             doc.get('body').innerHTML = this.responseText;
 
             doc.get('.nav-icon').addEventListener('click', function () {
                 alert(1);
-            })
+            });
 
-            var baseURL = 'https://0ss0paddq1.execute-api.ap-northeast-2.amazonaws.com/default';
-            //var baseURL = '';
+            //var baseURL = 'https://0ss0paddq1.execute-api.ap-northeast-2.amazonaws.com/default/';
+            //var baseURL = '/../';
+            var baseURL = '/../default/';
 
             doc.get('#test_get').addEventListener('click', function () {
                 var testGetFormData = new FormData();
                 testGetFormData.append('a', 1);
                 testGetFormData.append('b', 2);
 
-                xmlHttp.request(eHttp.GET, baseURL + './test1/test_get', testGetFormData, true, function () {
+                xmlHttp.request(eHttp.GET, baseURL + 'test1/test_get', testGetFormData, true, function () {
                     console.log(this.responseText);
-                })
-            })
+                });
+            });
 
             doc.get('#test_post').addEventListener('click', function () {
                 var testPostFormData = new FormData();
                 testPostFormData.append('a', 1);
                 testPostFormData.append('b', 2);
 
-                xmlHttp.request(eHttp.POST, baseURL + './test1/test_post', testPostFormData, true, function () {
+                xmlHttp.request(eHttp.POST, baseURL + 'test1/test_post', testPostFormData, true, function () {
                     console.log(this.responseText);
-                })
-            })
-            
-            doc.get('#test_json').addEventListener('click', function () {
-                xmlHttp.request(eHttp.JSON, baseURL + './test2/test_json', {'a':1, 'b': 2}, true, function () {
-                    console.log(this.responseText);
-                })
-            })
-
-            doc.get('#test_upload').addEventListener('click', function () {
-                let testUploadFormData = new FormData(doc.get('form'));
-
-                xmlHttp.request(eHttp.UPLOAD, baseURL + './test2/test_upload', testUploadFormData, true, function () {
-                    console.log(this.responseText);
-                })
-            })
-
-            doc.get('.copyright-year').innerHTML = (new Date()).getFullYear();
-            doc.get('.msg-container').addEventListener('click', function () {
-                this.style.display = 'none';
+                });
             });
             
+            doc.get('#test_json').addEventListener('click', function () {
+                xmlHttp.request(eHttp.JSON, baseURL + 'test2/test_json', {'a':1, 'b': 2}, true, function () {
+                    console.log(this.responseText);
+                });
+            });
+
+            doc.get('#test_upload').addEventListener('click', function () {
+                /*
+                var file = doc.get('input[name=file]').files[0];
+                var testUploadFormData = new FormData();
+                testUploadFormData.append('file', file);
+                */
+                var testUploadFormData = new FormData(doc.get('form'));
+
+                xmlHttp.request(eHttp.UPLOAD, baseURL + 'test2/test_upload', testUploadFormData, true, function () {
+                    console.log(this.responseText);
+                });
+            });
+
             doc.get('#test_websock_connect').addEventListener('click', function () {
                 webSock.connect('ws://ec2-52-79-228-44.ap-northeast-2.compute.amazonaws.com:10081', 'chat-protocol', function openCallback (evt) {
                 }, function messageCallback (evt) {
@@ -102,6 +103,11 @@ window.addEventListener('load', function () {
             
             doc.get('#test_storage_local_remove').addEventListener('click', function () {
                 storage.remove(eStorage.LOCAL, 'a');
+            });
+
+            doc.get('.copyright-year').innerHTML = (new Date()).getFullYear();
+            doc.get('.msg-container').addEventListener('click', function () {
+                this.style.display = 'none';
             });
         });
     });

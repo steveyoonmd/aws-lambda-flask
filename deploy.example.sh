@@ -9,7 +9,7 @@ rm -rf ./libs/__pycache__
 cp -r ./blueprints ./builds
 cp -r ./libs ./builds
 cp -r ./static ./builds
-cp app.py ./builds
+cp *.py ./builds
 
 cd ./builds
 pip3 install --target ./package flask

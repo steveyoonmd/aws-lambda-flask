@@ -2,7 +2,7 @@
 from flask import request, session, request
 
 from libs.aws_lambda import AwsLambdaFlask
-from libs.utils import respond_if_options
+from libs.utils import respond_if_options, make_resp
 
 def create_app():
     app = AwsLambdaFlask(__name__, static_folder='static', static_url_path='/static')
