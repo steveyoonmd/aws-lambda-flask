@@ -1,4 +1,5 @@
 __pycache__/
-bin/
+builds/
 .idea/
 deploy.sh
+

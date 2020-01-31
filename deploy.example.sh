@@ -3,6 +3,9 @@
 rm -rf ./builds
 mkdir -p ./builds/package
 
+rm -rf ./blueprints/__pycache__
+rm -rf ./libs/__pycache__
+
 cp -r ./blueprints ./builds
 cp -r ./libs ./builds
 cp -r ./static ./builds
