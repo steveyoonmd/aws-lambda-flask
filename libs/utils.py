@@ -1,36 +1,32 @@
-
+import hashlib
 from functools import update_wrapper
 
-from flask import current_app, request, make_response
+import pymysql
+from flask import current_app, g, request, make_response
+
+from libs.enums import Error
 
 
-origins = [
-    'http://ec2-52-79-228-44.ap-northeast-2.compute.amazonaws.com:5000',
-]
+def md5hex(plain_text):
+    m = hashlib.md5()
+    m.update(plain_text.encode('utf-8'))
+
+    return m.hexdigest()
 
 
-def with_origin(req):
-    origin = req.headers.get('Origin', '')
+def with_origin():
+    origin = g.req.headers.get('Origin', '')
 
-    if origin not in origins:
-        origin = origins[0]
+    if origin not in g.cfg['access_allowed_http_origins']:
+        origin = g.cfg['access_allowed_http_origins'][0]
 
     return {
         'Access-Control-Allow-Origin': origin,
         'Access-Control-Allow-Methods': 'DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT',
-        'Access-Control-Allow-Headers': 'Authorization, Content-Type, Cookie, Origin, X-Amz-Date, X-Amz-Security-Token, X-Api-Key, x-forced-preflight',
+        'Access-Control-Allow-Headers': 'Authorization, Content-Type, Cookie, Origin, X-Amz-Date, '
+                                        'X-Amz-Security-Token, X-Api-Key, x-forced-preflight',
         'Access-Control-Allow-Credentials': 'true',
     }
-
-
-def make_resp(req, body):
-    resp = make_response(body)
-
-    headers = with_origin(req)
-    for key, value in headers.items():
-        resp.headers[key] = value
-
-    return resp
 
 
 # https://stackoverflow.com/questions/26980713/solve-cross-origin-resource-sharing-with-flask
@@ -42,7 +38,7 @@ def respond_if_options():
             else:
                 opts_resp = make_response(f(*args, **kwargs))
 
-            headers = with_origin(request)
+            headers = with_origin()
             for key, value in headers.items():
                 opts_resp.headers[key] = value
 
@@ -52,3 +48,55 @@ def respond_if_options():
         return update_wrapper(wrapped_function, f)
 
     return decorator
+
+
+def remote_ip_addr_ends_with_asterisk():
+    remote_ip_addr = g.req.remote_addr
+    if g.req.headers.getlist('X-Forwarded-For'):
+        remote_ip_addr = g.req.headers.getlist('X-Forwarded-For')[0]
+
+    remote_ip_addr_split = remote_ip_addr.split('.')
+    remote_ip_addr_split.pop()
+    remote_ip_addr_split.append('*')
+
+    return '.'.join(remote_ip_addr_split)
+
+
+def is_access_allowed_ip_addr():
+    if remote_ip_addr_ends_with_asterisk() in g.cfg['access_allowed_ip_addrs_end_with_asterisk'].keys():
+        return True
+
+    g.res.err = Error.ACCESS_NOT_ALLOWED_IP_ADDR
+    return False
+
+
+def is_logged_in(sess):
+    if 'user_id' not in sess or sess.get('user_id', '') == '':
+        g.res.err = Error.USERS_LOGIN_REQUIRED
+        g.res.url = './users_login.html'
+        return False
+
+    return True
+
+
+def connect_database(key):
+    g.db[key] = pymysql.connect(host=g.cfg['database_' + key]['host'], user=g.cfg['database_' + key]['user'],
+                                password=g.cfg['database_' + key]['password'],
+                                charset=g.cfg['database_' + key]['charset'],
+                                database=g.cfg['database_' + key]['database'], port=g.cfg['database_' + key]['port'],
+                                cursorclass=pymysql.cursors.DictCursor)
+    g.cursor[key] = g.db[key].cursor()
+
+
+def escape_str(s):
+    return pymysql.escape_string(s)
+
+
+def make_resp():
+    resp = make_response(g.res)
+
+    headers = with_origin()
+    for key, value in headers.items():
+        resp.headers[key] = value
+
+    return resp

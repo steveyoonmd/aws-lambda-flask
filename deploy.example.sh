@@ -9,9 +9,12 @@ rm -rf ./libs/__pycache__
 cp -r ./blueprints ./builds
 cp -r ./libs ./builds
 cp -r ./static ./builds
-cp *.py ./builds
+cp cfg.json ./builds
+cp app.py ./builds
 
 cd ./builds
+# pip3 install --target ./package 'pymysql[rsa]'
+pip3 install --target ./package pymysql
 pip3 install --target ./package flask
 
 DATE=$(date '+%Y%m%d_%H%M%S_%Z')
@@ -24,7 +27,8 @@ zip -r9 ./build_$DATE.zip ./blueprints
 zip -r9 ./build_$DATE.zip ./libs
 zip -r9 ./build_$DATE.zip ./static
 
-zip -g build_$DATE.zip *.py
+zip -g build_$DATE.zip cfg.json
+zip -g build_$DATE.zip app.py
 
 # aws lambda update-function-code --function-name my-function --zip-file fileb://build_$DATE.zip
 

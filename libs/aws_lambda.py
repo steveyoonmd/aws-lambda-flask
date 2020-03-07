@@ -17,6 +17,7 @@
 # https://github.com/adamchainz/apig-wsgi
 
 import sys
+from base64 import b64decode
 from io import BytesIO
 
 from flask import Flask
@@ -29,6 +30,7 @@ def wsgi_env(evt):
         'SERVER_PROTOCOL': 'HTTP/1.1',
         'SERVER_NAME': 'localhost',
         'SERVER_PORT': '80',
+        'REMOTE_ADDR': '127.0.0.1',
 
         'wsgi.version': (1, 0),
         'wsgi.errors': sys.stderr,
@@ -38,18 +40,9 @@ def wsgi_env(evt):
         'wsgi.multiprocess': False,
         'wsgi.multithread': False,
     }
-        
+
     query_string_parameters = evt.get('queryStringParameters', {}) or {}
-    env['QUERY_STRING'] = '&'.join('{}={}'.format(k, v) for (k, v) in query_string_parameters.items())
-
-    body = evt.get('body', '') or ''
-    if evt.get('isBase64Encoded', False):
-        body = b64decode(body)
-    else:
-        body = body.encode('utf-8')
-
-    env['CONTENT_LENGTH'] = str(len(body))
-    env['wsgi.input'] = BytesIO(body)
+    env['QUERY_STRING'] = '&'.join('{}={}'.format(k, v) for k, v in query_string_parameters.items())
 
     headers = evt.get('headers', {}) or {}
     for key, value in headers.items():
@@ -68,6 +61,21 @@ def wsgi_env(evt):
 
         env['HTTP_' + key] = value
 
+    # When you send multipart/form-data to AWS Lambda via AWS API Gateway,
+    # Python receives the multipart body as utf-8 string, even if it's an image file.
+    # For Python, the multipart body needs to be encoded in base64.
+    # 1. AWS API Gateway -> Resources -> Create Method -> Use Lambda Proxy integration
+    # 2. AWS API Gateway -> Settings -> Binary Media Types -> multipart/form-data
+    # 3. Browser -> XMLHttpRequest -> xhr.setRequestHeader('Accept', 'multipart/form-data');
+    body = evt.get('body', '') or ''
+    if evt.get('isBase64Encoded', False):
+        body = b64decode(body)
+    else:
+        body = body.encode('utf-8')
+
+    env['CONTENT_LENGTH'] = str(len(body))
+    env['wsgi.input'] = BytesIO(body)
+
     return env
 
 
@@ -81,14 +89,14 @@ class AwsLambdaResponse:
         self.statusCode = status_code[:3]
         self.headers.extend(headers)
 
-    def write_body(self, body):
+    def write_body(self, stream):
         try:
-            for data in body:
+            for data in stream:
                 if data:
                     self.body.write(data)
         finally:
-            if hasattr(body, 'close'):
-                body.close()
+            if hasattr(stream, 'close'):
+                stream.close()
 
     def as_dict(self):
         return {
