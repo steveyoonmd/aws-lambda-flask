@@ -1,0 +1,31 @@
+{
+  "application": {
+    "secret_key": "_this_is_your_flask_app_secret_key_you_must_change_this_"
+  },
+  "session": {
+    "domain": "127.0.0.1"
+  },
+  "aes_crypto": {
+    "key": "_this_is_your_aes_crypto_key_key_you_must_change_this_"
+  },
+  "access_allowed_http_origins": [
+    "http://127.0.0.1:5000"
+  ],
+  "access_allowed_ip_addrs_end_with_asterisk": {
+    "127.0.0.*": "localhost ip"
+  },
+  "database_test1": {
+    "host": "localhost",
+    "user": "user1",
+    "password": "password1",
+    "charset": "utf8mb4",
+    "database": "database1",
+    "port": 3306
+  },
+  "upload": {
+    "directory": ""
+  },
+  "aws_s3": {
+    "bucket": ""
+  }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>users_login</title>
+</head>
+
+<body>
+<nav></nav>
+<header></header>
+
+<main>
+    <form class="form-resp" method="post" name="users_login">
+        <input name="md5_hash" type="hidden">
+
+        <h1>로그인</h1>
+        <p>아래 정보를 입력하세요.</p>
+        <hr>
+
+        <label>아이디</label>
+        <input name="user_id" required type="text">
+
+        <label>비밀번호</label>
+        <input name="passwd" required type="password">
+
+        <hr>
+        <button class="submitbtn" type="submit">확인</button>
+    </form>
+</main>
+<footer></footer>
+
+<div class="msg-container"></div>
+</body>
+
+<script src="./js/enums.js?2020-01-20"></script>
+<script src="./js/libs.js?2020-01-20"></script>
+<script src="./js/md5.js?2020-01-20"></script>
+<script>
+'use strict';
+
+window.addEventListener('load', function () {
+    let styleHTML = './users_style.html';
+    let showNav = false;
+
+    loadHTML(styleHTML, showNav, function (baseURL) {
+        doc.get('form[name=users_login]').addEventListener('submit', function (evt) {
+            evt.preventDefault();
+            let formUserLogin = this;
+
+            this.md5_hash.value = hex_md5(this.user_id.value + hex_md5(this.passwd.value));
+            this.passwd.value = '';
+
+            let formData = new FormData(formUserLogin);
+
+            let jsonData = {};
+            for (let pair of formData.entries()) {
+                jsonData[pair[0]] = pair[1];
+            }
+
+            let return_url = (new URLSearchParams(window.location.search)).get('return_url');
+            jsonData['return_url'] = return_url === null ? '/' : return_url;
+
+            xmlHttp.request(eHttp.JSON, baseURL + '/users/login', jsonData, true, function () {
+                let xhrResp = parseRespText(this);
+
+                if (xhrResp === null) {
+                    formUserLogin.passwd.value = '';
+                    return;
+                }
+
+                if (xhrResp.url !== '') {
+                    window.location.href = xhrResp.url;
+                }
+            });
+        });
+    });
+});
+</script>
+</html>

@@ -1,0 +1,18 @@
+{
+  "localhost": {
+    "host": "localhost",
+    "user": "user1",
+    "password": "password1",
+    "charset": "utf8mb4",
+    "database": "database1",
+    "port": 3306
+  },
+  "dev": {
+    "host": "localhost",
+    "user": "user1",
+    "password": "password1",
+    "charset": "utf8mb4",
+    "database": "database1",
+    "port": 3306
+  }
+}

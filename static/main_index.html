@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>main_index</title>
+</head>
+
+<body>
+<nav></nav>
+<header></header>
+
+<main>
+    <p>
+        <button id="test_get">test_get</button>
+    </p>
+
+    <p>
+        <button id="test_post">test_post</button>
+    </p>
+
+    <p>
+        <button id="test_json">test_json</button>
+    </p>
+
+    <form enctype="multipart/form-data" method="post">
+        <p>
+            <input name="name" type="text" value="user1">
+        </p>
+
+        <p>
+            <input name="file" type="file">
+        </p>
+
+        <p>
+            <input id="test_upload" type="button" value="upload">
+        </p>
+    </form>
+
+    <p>
+        <button id="test_orm">test_orm</button>
+    </p>
+
+    <p>
+        <button id="test_aes">test_aes</button>
+    </p>
+
+    <p>
+        <button id="test_websock_connect">test_websock_connect</button>
+    </p>
+
+    <p>
+        <button id="test_websock_send">test_websock_send</button>
+    </p>
+
+    <p>
+        <button id="test_websock_disconnect">test_websock_disconnect</button>
+    </p>
+
+    <p>
+        <button id="test_storage_session_get">test_storage_session_get</button>
+    </p>
+
+    <p>
+        <button id="test_storage_session_set">test_storage_session_set</button>
+    </p>
+
+    <p>
+        <button id="test_storage_session_remove">test_storage_session_remove</button>
+    </p>
+
+    <p>
+        <button id="test_storage_local_get">test_storage_local_get</button>
+    </p>
+
+    <p>
+        <button id="test_storage_local_set">test_storage_local_set</button>
+    </p>
+
+    <p>
+        <button id="test_storage_local_remove">test_storage_local_remove</button>
+    </p>
+
+    <div class="form-resp">
+        <form method="post">
+            <label>test1</label>
+            <input name="test1" type="text">
+
+            <hr>
+            <input type="submit" value="확인">
+        </form>
+    </div>
+</main>
+<footer></footer>
+
+<div class="msg-container"></div>
+</body>
+
+<script src="./js/enums.js?2020-01-20"></script>
+<script src="./js/libs.js?2020-01-20"></script>
+<script>
+'use strict';
+
+window.addEventListener('load', function () {
+    let styleHTML = './main_style.html';
+    let showNav = true;
+
+    loadHTML(styleHTML, showNav, function (baseURL) {
+        doc.get('#test_get').addEventListener('click', function () {
+            let testGetFormData = new FormData();
+            testGetFormData.append('a', 1);
+            testGetFormData.append('b', 2);
+
+            xmlHttp.request(eHttp.GET, baseURL + '/tests1/test_get', testGetFormData, true, function () {
+                let xhrResp = parseRespText(this);
+            });
+        });
+
+        doc.get('#test_post').addEventListener('click', function () {
+            let testPostFormData = new FormData();
+            testPostFormData.append('a', 1);
+            testPostFormData.append('b', 2);
+
+            xmlHttp.request(eHttp.POST, baseURL + '/tests1/test_post', testPostFormData, true, function () {
+                console.log(this.responseText);
+            });
+        });
+
+        doc.get('#test_json').addEventListener('click', function () {
+            xmlHttp.request(eHttp.JSON, baseURL + '/tests2/test_json', {'a':1, 'b': 2}, true, function () {
+                console.log(this.responseText);
+            });
+        });
+
+        doc.get('#test_upload').addEventListener('click', function () {
+            let testUploadFormData = new FormData(doc.get('form'));
+
+            xmlHttp.request(eHttp.UPLOAD, baseURL + '/tests2/test_upload', testUploadFormData, true, function () {
+                console.log(this.responseText);
+            });
+        });
+
+        doc.get('#test_orm').addEventListener('click', function () {
+            xmlHttp.request(eHttp.JSON, baseURL + '/tests3/test_orm', {}, true, function () {
+                console.log(this.responseText);
+            });
+        });
+
+        doc.get('#test_aes').addEventListener('click', function () {
+            xmlHttp.request(eHttp.JSON, baseURL + '/tests3/test_aes', {}, true, function () {
+                console.log(this.responseText);
+            });
+        });
+
+        doc.get('#test_websock_connect').addEventListener('click', function () {
+            webSock.connect('ws://ec2-52-79-228-44.ap-northeast-2.compute.amazonaws.com:10081', 'chat-protocol',
+            function openCallback (evt) {
+            },
+            function messageCallback (evt) {
+                window.alert(evt.data);
+            });
+        });
+
+        doc.get('#test_websock_send').addEventListener('click', function () {
+            webSock.send('test_websock_send');
+        });
+
+        doc.get('#test_websock_disconnect').addEventListener('click', function () {
+            webSock.disconnect();
+        });
+
+        doc.get('#test_storage_session_get').addEventListener('click', function () {
+            window.alert(storage.get(eStorage.SESSION, 'a', 0));
+        });
+
+        doc.get('#test_storage_session_set').addEventListener('click', function () {
+            storage.set(eStorage.SESSION, 'a', 1);
+        });
+
+        doc.get('#test_storage_session_remove').addEventListener('click', function () {
+            storage.remove(eStorage.SESSION, 'a');
+        });
+
+        doc.get('#test_storage_local_get').addEventListener('click', function () {
+            window.alert(storage.get(eStorage.LOCAL, 'a', 0));
+        });
+
+        doc.get('#test_storage_local_set').addEventListener('click', function () {
+            storage.set(eStorage.LOCAL, 'a', 1);
+        });
+
+        doc.get('#test_storage_local_remove').addEventListener('click', function () {
+            storage.remove(eStorage.LOCAL, 'a');
+        });
+    });
+});
+</script>
+</html>
