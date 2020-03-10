@@ -11,6 +11,9 @@ def select_count_without_sub_query(query):
 
 
 def json_serializable(rows):
+    if rows is None:
+        return None
+
     if isinstance(rows, list):
         serializable = []
         for row in rows:
