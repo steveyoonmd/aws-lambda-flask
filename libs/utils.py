@@ -82,6 +82,9 @@ def is_user_logged_in():
 
 
 def connect_database(key):
+    if key in g.curso:
+        return
+    
     g.db[key] = pymysql.connect(host=g.cfg['database_' + key]['host'], user=g.cfg['database_' + key]['user'],
                                 password=g.cfg['database_' + key]['password'],
                                 charset=g.cfg['database_' + key]['charset'],
