@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from libs.aws_lambda import AwsLambdaFlask
 from libs.dict_as_obj import DictAsObj
 from libs.enums import Error
-from libs.utils import md5hex, is_logged_in
+from libs.utils import md5hex, is_user_logged_in
 
 db = SQLAlchemy()
 
@@ -69,6 +69,7 @@ def create_app():
     @app.before_request
     def before_request():
         g.cfg = app.config['G_CFG']
+        g.sess = session
         g.req = request
         g.res = DictAsObj({
             'err': Error.UNKNOWN,
@@ -76,11 +77,11 @@ def create_app():
             'dat': None,
         })
 
-        session['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
+        g.sess['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
 
     @app.route('/')
     def index():
-        if is_logged_in(session):
+        if is_user_logged_in():
             return redirect('./static/main_index.html')
 
         return redirect('./static/users_login.html?return_url=main_index.html')

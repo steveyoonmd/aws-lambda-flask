@@ -10,6 +10,7 @@ users = Blueprint('users', __name__, url_prefix='/users')
 @users.before_request
 def before_request():
     g.cfg = current_app.config['G_CFG']
+    g.sess = session
     g.req = request
     g.res = DictAsObj({
         'err': Error.UNKNOWN,
@@ -20,7 +21,7 @@ def before_request():
     g.db = {}
     g.cursor = {}
 
-    session['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
+    g.sess['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
     connect_database('test1')
 
 
@@ -45,13 +46,13 @@ def login():
     return_url = req_json.get('return_url', '/')
 
     if user_id == 'user1' and md5_hash == md5hex(user_id + md5hex('password1')):
-        session['user_id'] = 'steve'
+        g.sess['user_id'] = 'steve'
 
         g.res.err = Error.NONE
         g.res.url = return_url
         return make_resp()
     else:
-        g.res.err = Error.USERS_LOGIN_FAILED
+        g.res.err = Error.USER_LOGIN_FAILED
         return make_resp()
 
     g.cursor['test1'].execute('SELECT VERSION() AS version')
@@ -68,7 +69,7 @@ def logout():
     if not is_access_allowed_ip_addr():
         return make_resp()
 
-    session['user_id'] = ''
+    g.sess['user_id'] = ''
 
     g.res.err = Error.NONE
     g.res.url = './users_login.html'

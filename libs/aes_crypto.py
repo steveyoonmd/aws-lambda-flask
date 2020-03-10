@@ -1,3 +1,4 @@
+import secrets
 from base64 import b64encode, b64decode
 
 from libs.utils import md5hex
@@ -5,7 +6,7 @@ from libs.utils import md5hex
 crypto_imported = True
 try:
     from Crypto.Cipher import AES
-    from Crypto import Random
+    # from Crypto import Random
 except ImportError as ex:
     print(ex)
     crypto_imported = False
@@ -30,7 +31,8 @@ class AESCrypto:
 
         padded = self.pad(plain_text)
 
-        iv = Random.new().read(AES.block_size)
+        # iv = Random.new().read(AES.block_size)
+        iv = secrets.token_bytes(AES.block_size)
         aes_new = AES.new(self.key, AES.MODE_CBC, iv)
 
         encoded = b64encode(iv + aes_new.encrypt(padded)).decode('utf-8')
@@ -46,7 +48,7 @@ class AESCrypto:
         replaced = b64encoded.replace('_', '+')
         decoded = b64decode(replaced)
 
-        iv = decoded[:16]
+        iv = decoded[:AES.block_size]
         aes_new = AES.new(self.key, AES.MODE_CBC, iv)
 
-        return self.unpad(aes_new.decrypt(decoded[16:])).decode('utf-8')
+        return self.unpad(aes_new.decrypt(decoded[AES.block_size:])).decode('utf-8')

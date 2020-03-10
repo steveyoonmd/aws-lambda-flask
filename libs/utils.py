@@ -1,4 +1,6 @@
 import hashlib
+import secrets
+from base64 import b64encode
 from functools import update_wrapper
 
 import pymysql
@@ -70,9 +72,9 @@ def is_access_allowed_ip_addr():
     return False
 
 
-def is_logged_in(sess):
-    if 'user_id' not in sess or sess.get('user_id', '') == '':
-        g.res.err = Error.USERS_LOGIN_REQUIRED
+def is_user_logged_in():
+    if 'user_id' not in g.sess or g.sess.get('user_id', '') == '':
+        g.res.err = Error.USER_LOGIN_REQUIRED
         g.res.url = './users_login.html'
         return False
 
@@ -88,6 +90,14 @@ def connect_database(key):
     g.cursor[key] = g.db[key].cursor()
 
 
+def is_valid_csrf_token(csrf_token):
+    if 'csrf_token' not in g.req.cookies or csrf_token != g.req.cookies['csrf_token']:
+        g.res.err = Error.CSRF_TOKEN_INVALID
+        return False
+
+    return True
+
+
 def escape_str(s):
     return pymysql.escape_string(s)
 
@@ -99,4 +109,5 @@ def make_resp():
     for key, value in headers.items():
         resp.headers[key] = value
 
+    resp.set_cookie('csrf_token', b64encode(secrets.token_bytes(16)).decode('utf-8').replace('+', '_'))
     return resp

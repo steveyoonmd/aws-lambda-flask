@@ -4,7 +4,7 @@ from flask import Blueprint, g, current_app, session, request
 
 from libs.dict_as_obj import DictAsObj
 from libs.enums import Error
-from libs.utils import respond_if_options, connect_database, is_access_allowed_ip_addr, is_logged_in, make_resp
+from libs.utils import respond_if_options, connect_database, is_access_allowed_ip_addr, is_user_logged_in, make_resp
 
 tests1 = Blueprint('tests1', __name__, url_prefix='/tests1')
 
@@ -12,6 +12,7 @@ tests1 = Blueprint('tests1', __name__, url_prefix='/tests1')
 @tests1.before_request
 def before_request():
     g.cfg = current_app.config['G_CFG']
+    g.sess = session
     g.req = request
     g.res = DictAsObj({
         'err': Error.UNKNOWN,
@@ -22,7 +23,7 @@ def before_request():
     g.db = {}
     g.cursor = {}
 
-    session['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
+    g.sess['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
     connect_database('test1')
 
 
@@ -38,7 +39,7 @@ def teardown_request(ex=None):
 @tests1.route('/test_get', methods=['OPTIONS', 'GET'])
 @respond_if_options()
 def test_get():
-    if not is_access_allowed_ip_addr() or not is_logged_in(session):
+    if not is_access_allowed_ip_addr() or not is_user_logged_in():
         return make_resp()
 
     query = 'INSERT INTO test1(col01, col02, col03, col04, col05, col06, col07, col08, col09, col10, col11, ' \
@@ -65,7 +66,7 @@ def test_get():
 @tests1.route('/test_post', methods=['OPTIONS', 'POST'])
 @respond_if_options()
 def test_post():
-    if not is_access_allowed_ip_addr() or not is_logged_in(session):
+    if not is_access_allowed_ip_addr() or not is_user_logged_in():
         return make_resp()
 
     query = 'SELECT * FROM test1 ORDER BY test1_id DESC LIMIT %s OFFSET %s '

@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 
 from libs.dict_as_obj import DictAsObj
 from libs.enums import Error
-from libs.utils import respond_if_options, connect_database, is_access_allowed_ip_addr, is_logged_in, make_resp
+from libs.utils import respond_if_options, connect_database, is_access_allowed_ip_addr, is_user_logged_in, make_resp
 
 tests2 = Blueprint('tests2', __name__, url_prefix='/tests2')
 
@@ -15,6 +15,7 @@ tests2 = Blueprint('tests2', __name__, url_prefix='/tests2')
 @tests2.before_request
 def before_request():
     g.cfg = current_app.config['G_CFG']
+    g.sess = session
     g.req = request
     g.res = DictAsObj({
         'err': Error.UNKNOWN,
@@ -25,7 +26,7 @@ def before_request():
     g.db = {}
     g.cursor = {}
 
-    session['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
+    g.sess['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
     connect_database('test1')
 
 
@@ -41,7 +42,7 @@ def teardown_request(ex=None):
 @tests2.route('/test_json', methods=['OPTIONS', 'POST'])
 @respond_if_options()
 def test_json():
-    if not is_access_allowed_ip_addr() or not is_logged_in(session):
+    if not is_access_allowed_ip_addr() or not is_user_logged_in():
         return make_resp()
 
     req_json = request.get_json()
@@ -57,7 +58,7 @@ def test_json():
 @tests2.route('/test_upload', methods=['OPTIONS', 'POST'])
 @respond_if_options()
 def test_upload():
-    if not is_access_allowed_ip_addr() or not is_logged_in(session):
+    if not is_access_allowed_ip_addr() or not is_user_logged_in():
         return make_resp()
 
     if 'file' not in request.files:
