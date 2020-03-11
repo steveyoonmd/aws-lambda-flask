@@ -3,6 +3,7 @@
 CREATE DATABASE database1 DEFAULT CHARACTER SET utf8mb4;
 
 CREATE USER 'user1'@'localhost' IDENTIFIED BY 'password1';
+-- ALTER USER 'user1'@'localhost' IDENTIFIED BY 'password1';
 GRANT ALL PRIVILEGES ON database1.* TO 'user1'@'localhost';
 FLUSH PRIVILEGES;
 

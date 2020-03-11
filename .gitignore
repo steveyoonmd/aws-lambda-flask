@@ -8,3 +8,4 @@ generated_models/
 tests.json
 batches.json
 deploy.sh
+debug.py
