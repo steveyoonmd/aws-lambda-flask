@@ -19,22 +19,24 @@
 <script src="./js/enums.js?2020-01-20"></script>
 <script src="./js/libs.js?2020-01-20"></script>
 <script>
-'use strict';
+    'use strict';
 
-window.addEventListener('load', function () {
-    let styleHTML = './users_style.html';
-    let showNav = false;
+    window.addEventListener('load', function () {
+        let styleHTML = './users_style.html';
+        let showNav = false;
 
-    loadHTML(styleHTML, showNav, function (baseURL) {
-        xmlHttp.request(eHttp.JSON, baseURL + '/users/logout', {}, true, function () {
-            let xhrResp = parseRespText(this);
-            if (xhrResp === null) { return; }
+        loadHTML(styleHTML, showNav, function (baseURL) {
+            xmlHttp.request(eHttp.JSON, baseURL + '/users/logout', {}, true, function () {
+                let xhrResp = parseRespText(this);
+                if (xhrResp === null) {
+                    return;
+                }
 
-            if (xhrResp.url !== '') {
-                window.location.href = xhrResp.url;
-            }
+                if (xhrResp.url !== '') {
+                    window.location.href = xhrResp.url;
+                }
+            });
         });
     });
-});
 </script>
 </html>

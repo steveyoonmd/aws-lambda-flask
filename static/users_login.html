@@ -37,44 +37,44 @@
 <script src="./js/libs.js?2020-01-20"></script>
 <script src="./js/md5.js?2020-01-20"></script>
 <script>
-'use strict';
+    'use strict';
 
-window.addEventListener('load', function () {
-    let styleHTML = './users_style.html';
-    let showNav = false;
+    window.addEventListener('load', function () {
+        let styleHTML = './users_style.html';
+        let showNav = false;
 
-    loadHTML(styleHTML, showNav, function (baseURL) {
-        doc.get('form[name=users_login]').addEventListener('submit', function (evt) {
-            evt.preventDefault();
-            let formUserLogin = this;
+        loadHTML(styleHTML, showNav, function (baseURL) {
+            doc.get('form[name=users_login]').addEventListener('submit', function (evt) {
+                evt.preventDefault();
+                let formUserLogin = this;
 
-            this.md5_hash.value = hex_md5(this.user_id.value + hex_md5(this.passwd.value));
-            this.passwd.value = '';
+                this.md5_hash.value = hex_md5(this.user_id.value + hex_md5(this.passwd.value));
+                this.passwd.value = '';
 
-            let formData = new FormData(formUserLogin);
+                let formData = new FormData(formUserLogin);
 
-            let jsonData = {};
-            for (let pair of formData.entries()) {
-                jsonData[pair[0]] = pair[1];
-            }
-
-            let return_url = (new URLSearchParams(window.location.search)).get('return_url');
-            jsonData['return_url'] = return_url === null ? '/' : return_url;
-
-            xmlHttp.request(eHttp.JSON, baseURL + '/users/login', jsonData, true, function () {
-                let xhrResp = parseRespText(this);
-
-                if (xhrResp === null) {
-                    formUserLogin.passwd.value = '';
-                    return;
+                let jsonData = {};
+                for (let pair of formData.entries()) {
+                    jsonData[pair[0]] = pair[1];
                 }
 
-                if (xhrResp.url !== '') {
-                    window.location.href = xhrResp.url;
-                }
+                let return_url = (new URLSearchParams(window.location.search)).get('return_url');
+                jsonData['return_url'] = return_url === null ? '/' : return_url;
+
+                xmlHttp.request(eHttp.JSON, baseURL + '/users/login', jsonData, true, function () {
+                    let xhrResp = parseRespText(this);
+
+                    if (xhrResp === null) {
+                        formUserLogin.passwd.value = '';
+                        return;
+                    }
+
+                    if (xhrResp.url !== '') {
+                        window.location.href = xhrResp.url;
+                    }
+                });
             });
         });
     });
-});
 </script>
 </html>

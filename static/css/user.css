@@ -1,102 +1,116 @@
 body {
-	font-family: "Nanum Gothic", "Malgun Gothic";
+    font-family: "Nanum Gothic", "Malgun Gothic";
     /* background-color: black; */
 }
 
 * {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
-a{text-decoration: none;}
-a:link{color:dodgerblue;}
-a:visited{color:dodgerblue;}
-a:hover{color:dodgerblue;}
-a:active{color:dodgerblue;}
+a {
+    text-decoration: none;
+}
+
+a:link {
+    color: dodgerblue;
+}
+
+a:visited {
+    color: dodgerblue;
+}
+
+a:hover {
+    color: dodgerblue;
+}
+
+a:active {
+    color: dodgerblue;
+}
 
 label {
-	font-weight: bold;
+    font-weight: bold;
 }
 
 input, select {
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	font-size: 1em;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-size: 1em;
 }
 
 /* Add padding to main */
 main {
-	padding: 16px;
-	background-color: white;
+    padding: 16px;
+    background-color: white;
 }
 
 /* Full-width input fields */
 input[type=text], input[type=password], select {
-	display: inline-block;
-	margin: 5px 0 22px 0;
-	width: 100%;
-	border: none;
-	border-radius: 4px;
-	padding: 12px;
-	background: #f1f1f1;
+    display: inline-block;
+    margin: 5px 0 22px 0;
+    width: 100%;
+    border: none;
+    border-radius: 4px;
+    padding: 12px;
+    background: #f1f1f1;
 }
 
 input[type=text]:focus, input[type=password]:focus {
-	outline: none;
-	background-color: #ddd;
+    outline: none;
+    background-color: #ddd;
 }
 
 /* Overwrite default styles of hr */
 hr {
-	margin-bottom: 25px;
-	border: 1px solid #f1f1f1;
+    margin-bottom: 25px;
+    border: 1px solid #f1f1f1;
 }
 
 /* Set a style for the submit button */
 .submitbtn {
-	margin: 8px 0;
-	width: 100%;
-	border: none;
-	border-radius: 4px;
-	padding: 14px 20px;
-	background-color: #2196F3;
-	font-size: 1em;
-	color: white;
-	cursor: pointer;
-	opacity: 0.9;
+    margin: 8px 0;
+    width: 100%;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 20px;
+    background-color: #2196F3;
+    font-size: 1em;
+    color: white;
+    cursor: pointer;
+    opacity: 0.9;
 }
 
 .submitbtn:hover {
-	opacity: 1;
+    opacity: 1;
 }
 
 .naverbtn {
-	margin: 8px 0;
-	width: 100%;
-	border: none;
-	border-radius: 4px;
-	padding: 14px 20px;
-	background-color: #1EC800;
-	font-size: 1em;
-	color: white;
-	cursor: pointer;
-	opacity: 0.9;
+    margin: 8px 0;
+    width: 100%;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 20px;
+    background-color: #1EC800;
+    font-size: 1em;
+    color: white;
+    cursor: pointer;
+    opacity: 0.9;
 }
 
 .naverbtn:hover {
-	opacity: 1;
+    opacity: 1;
 }
 
 /* Set a grey background color and center the text of the "sign in" section */
 .extra {
     /* background-color: #f1f1f1; */
-	text-align: center;
+    text-align: center;
 }
 
 footer {
-	padding: 48px 16px 16px 16px;
+    padding: 48px 16px 16px 16px;
 }
 
 .msg-container {

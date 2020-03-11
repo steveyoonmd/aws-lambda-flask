@@ -1,4 +1,5 @@
 import hashlib
+import json
 import secrets
 from base64 import b64encode
 from functools import update_wrapper
@@ -84,7 +85,7 @@ def is_user_logged_in():
 def connect_database(key):
     if key in g.cursor:
         return
-    
+
     g.db[key] = pymysql.connect(host=g.cfg['database_' + key]['host'], user=g.cfg['database_' + key]['user'],
                                 password=g.cfg['database_' + key]['password'],
                                 charset=g.cfg['database_' + key]['charset'],
@@ -106,6 +107,9 @@ def escape_str(s):
 
 
 def make_resp():
+    if isinstance(g.res, list) or isinstance(g.res, tuple):
+        g.res = json.dumps(g.res)
+
     resp = make_response(g.res)
 
     headers = with_origin()
