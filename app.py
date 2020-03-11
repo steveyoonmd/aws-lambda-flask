@@ -50,6 +50,7 @@ def app_config(app, file):
 
 def create_app():
     app = AwsLambdaFlask(__name__, static_folder='static', static_url_path='/static')
+    app.url_map.strict_slashes = False
     app_config(app, './cfg.json')
 
     db.init_app(app)
