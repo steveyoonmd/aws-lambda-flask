@@ -6,7 +6,7 @@ from libs.aes_crypto import AESCrypto
 from libs.dict_as_obj import DictAsObj
 from libs.enums import Error
 from libs.sql_alchemy import db, json_serializable
-from libs.utils import respond_if_options, connect_database, is_access_allowed_ip_addr, is_user_logged_in, make_resp
+from libs.utils import respond_if_options, is_access_allowed_ip_addr, is_user_logged_in, make_resp
 from models.test1 import Test1
 
 tests3 = Blueprint('tests3', __name__, url_prefix='/tests3')

@@ -2,7 +2,7 @@ from flask import Blueprint, g, current_app, session, request
 
 from libs.dict_as_obj import DictAsObj
 from libs.enums import Error
-from libs.utils import respond_if_options, connect_database, is_access_allowed_ip_addr, md5hex, make_resp
+from libs.utils import respond_if_options, is_access_allowed_ip_addr, md5hex, make_resp
 
 users = Blueprint('users', __name__, url_prefix='/users')
 
