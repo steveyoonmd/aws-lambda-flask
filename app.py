@@ -1,3 +1,4 @@
+from datetime import timedelta
 import json
 
 from flask import g, request, session, redirect
@@ -23,6 +24,9 @@ def app_config(app, file):
         # if they are set with `SameSite=None` and `Secure`.
         SESSION_COOKIE_SAMESITE=None,
         # SESSION_COOKIE_SECURE=True,
+        SESSION_PERMANENT=cfg['session']['permanent'],
+        PERMANENT_SESSION_LIFETIME=timedelta(minutes=cfg['session']['lifetime_minutes']),
+        SESSION_COOKIE_DOMAIN=cfg['session']['domain'],
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         SQLALCHEMY_DATABASE_URI='mysql+pymysql://{}:{}@{}/{}?charset={}'.format(cfg['database_test1']['user'],
                                                                                 cfg['database_test1']['password'],
@@ -77,8 +81,6 @@ def create_app():
             'url': '',
             'dat': None,
         })
-
-        g.sess['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
 
     @app.route('/')
     def index():

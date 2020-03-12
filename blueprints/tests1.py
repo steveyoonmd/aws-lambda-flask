@@ -23,9 +23,6 @@ def before_request():
     g.db = {}
     g.cursor = {}
 
-    g.sess['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
-    connect_database('test1')
-
 
 @tests1.teardown_request
 def teardown_request(ex=None):
@@ -46,6 +43,8 @@ def test_get():
             'col12) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW()) '
     params = (255, 65535, 429496729, 1844674407370955161, 5.01, 6.01, 'param7', 'param8', 'param9',
               '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.now()), None)
+
+    connect_database('test1')
     g.cursor['test1'].execute(query, params)
     g.db['test1'].commit()
     last_row_id = g.cursor['test1'].lastrowid
@@ -72,6 +71,7 @@ def test_post():
     query = 'SELECT * FROM test1 ORDER BY test1_id DESC LIMIT %s OFFSET %s '
     params = (1, 0)
 
+    connect_database('test1')
     g.cursor['test1'].execute(query, params)
     row = g.cursor['test1'].fetchone()
 

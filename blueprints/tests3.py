@@ -26,9 +26,6 @@ def before_request():
     g.db = {}
     g.cursor = {}
 
-    g.sess['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
-    connect_database('test1')
-
 
 @tests3.teardown_request
 def teardown_request(ex=None):

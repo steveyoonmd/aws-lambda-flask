@@ -26,9 +26,6 @@ def before_request():
     g.db = {}
     g.cursor = {}
 
-    g.sess['domain'] = g.req.headers.get('Host', g.cfg['session']['domain'])
-    connect_database('test1')
-
 
 @tests2.teardown_request
 def teardown_request(ex=None):
@@ -47,6 +44,7 @@ def test_json():
 
     req_json = request.get_json()
 
+    connect_database('test1')
     g.cursor['test1'].execute('SELECT VERSION() AS version')
     rows = g.cursor['test1'].fetchall()
 
