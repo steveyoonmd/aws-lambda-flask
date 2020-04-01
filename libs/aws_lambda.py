@@ -16,6 +16,7 @@
 
 # https://github.com/adamchainz/apig-wsgi
 
+import urllib.parse
 import sys
 from base64 import b64decode
 from io import BytesIO
@@ -42,7 +43,7 @@ def wsgi_env(evt):
     }
 
     query_string_parameters = evt.get('queryStringParameters', {}) or {}
-    env['QUERY_STRING'] = '&'.join('{}={}'.format(k, v) for k, v in query_string_parameters.items())
+    env['QUERY_STRING'] = '&'.join('{}={}'.format(k, urllib.parse.quote(v)) for k, v in query_string_parameters.items())
 
     headers = evt.get('headers', {}) or {}
     for key, value in headers.items():
@@ -53,7 +54,7 @@ def wsgi_env(evt):
         elif key == 'HOST':
             env['SERVER_NAME'] = value
         elif key == 'X_FORWARDED_PORT':
-            env["SERVER_PORT"] = value
+            env['SERVER_PORT'] = value
         elif key == 'X_FORWARDED_FOR':
             env['REMOTE_ADDR'] = value.split(', ')[0]
         elif key == 'X_FORWARDED_PROTO':
